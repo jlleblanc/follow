@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react'
 import { Bell, X, AlertCircle } from 'lucide-react'
 import { cn } from '../lib/utils'
+import { APP_NOTIFICATION_EVENT, type AppNotificationPayload } from '../notifications'
 
 export type Notification = {
   id: string
@@ -12,6 +13,27 @@ export type Notification = {
 export function NotificationBar() {
   const [notifications, setNotifications] = useState<Notification[]>([])
   const [expanded, setExpanded] = useState(false)
+
+  useEffect(() => {
+    const handler = (event: Event) => {
+      const customEvent = event as CustomEvent<AppNotificationPayload>
+      const payload = customEvent.detail
+      if (!payload) return
+
+      setNotifications(prev => [
+        {
+          id: crypto.randomUUID(),
+          type: payload.type,
+          message: payload.message,
+          timestamp: new Date(),
+        },
+        ...prev,
+      ])
+    }
+
+    window.addEventListener(APP_NOTIFICATION_EVENT, handler as EventListener)
+    return () => window.removeEventListener(APP_NOTIFICATION_EVENT, handler as EventListener)
+  }, [])
 
   const dismissNotification = (id: string) => {
     setNotifications(prev => prev.filter(n => n.id !== id))

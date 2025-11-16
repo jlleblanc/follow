@@ -7,9 +7,10 @@ import { getWebsites, removeWebsite as deleteWebsite } from '../services/databas
 interface HomeProps {
   onNavigate: (view: View) => void
   refreshTrigger?: number
+  onOpenWebsiteDetail?: (id: number) => void
 }
 
-export function Home({ onNavigate, refreshTrigger }: HomeProps) {
+export function Home({ onNavigate, refreshTrigger, onOpenWebsiteDetail }: HomeProps) {
   const [websites, setWebsites] = useState<Website[]>([])
   const [loading, setLoading] = useState(true)
 
@@ -28,11 +29,6 @@ export function Home({ onNavigate, refreshTrigger }: HomeProps) {
   useEffect(() => {
     loadWebsites()
   }, [refreshTrigger])
-
-  const openWebsite = (url: string) => {
-    // TODO: Open in new window or embedded view
-    window.open(url, '_blank')
-  }
 
   const removeWebsite = async (id: number) => {
     try {
@@ -76,7 +72,11 @@ export function Home({ onNavigate, refreshTrigger }: HomeProps) {
               <div
                 key={website.id}
                 className="group relative border border-gray-200 dark:border-gray-700 rounded-lg p-4 hover:border-blue-500 transition-colors cursor-pointer"
-                onClick={() => openWebsite(website.url)}
+                onClick={() => {
+                  if (website.id && onOpenWebsiteDetail) {
+                    onOpenWebsiteDetail(website.id)
+                  }
+                }}
               >
                 {/* Icon */}
                 <div className="w-12 h-12 rounded-lg bg-gray-100 dark:bg-gray-800 flex items-center justify-center mb-3">

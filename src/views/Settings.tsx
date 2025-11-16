@@ -1,3 +1,4 @@
+import { useState, useEffect } from 'react'
 import { ArrowLeft, Moon, Sun, Bell, Clock } from 'lucide-react'
 import { View } from '../App'
 
@@ -8,6 +9,15 @@ interface SettingsProps {
 }
 
 export function Settings({ onNavigate, theme, onThemeChange }: SettingsProps) {
+  const [intervalMinutes, setIntervalMinutes] = useState<number>(() => {
+    const stored = Number(localStorage.getItem('updateIntervalMinutes') ?? '60')
+    return Number.isFinite(stored) && stored > 0 ? stored : 60
+  })
+
+  useEffect(() => {
+    localStorage.setItem('updateIntervalMinutes', String(intervalMinutes))
+  }, [intervalMinutes])
+
   return (
     <div className="h-full flex flex-col">
       {/* Header */}
@@ -97,12 +107,16 @@ export function Settings({ onNavigate, theme, onThemeChange }: SettingsProps) {
                     How often to check RSS feeds for new content
                   </p>
                 </div>
-                <select className="px-4 py-2 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
-                  <option value="15">15 minutes</option>
-                  <option value="30">30 minutes</option>
-                  <option value="60" selected>1 hour</option>
-                  <option value="120">2 hours</option>
-                  <option value="360">6 hours</option>
+                <select
+                  className="px-4 py-2 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  value={intervalMinutes}
+                  onChange={(e) => setIntervalMinutes(Number(e.target.value))}
+                >
+                  <option value={15}>15 minutes</option>
+                  <option value={30}>30 minutes</option>
+                  <option value={60}>1 hour</option>
+                  <option value={120}>2 hours</option>
+                  <option value={360}>6 hours</option>
                 </select>
               </div>
             </div>

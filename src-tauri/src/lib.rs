@@ -56,6 +56,19 @@ async fn discover_website(url: String) -> Result<WebsiteMetadata, String> {
     })
 }
 
+#[tauri::command]
+async fn fetch_feed_entries(feed_url: String) -> Result<Vec<rss::FeedEntry>, String> {
+    println!("Fetching feed entries for: {}", feed_url);
+
+    match rss::fetch_feed(&feed_url).await {
+        Ok((_meta, entries)) => Ok(entries),
+        Err(e) => {
+            println!("Failed to fetch feed entries: {}", e);
+            Err(e)
+        }
+    }
+}
+
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
     let migrations = db::get_migrations();
@@ -69,7 +82,7 @@ pub fn run() {
         )
         .plugin(tauri_plugin_notification::init())
         .plugin(tauri_plugin_global_shortcut::Builder::new().build())
-        .invoke_handler(tauri::generate_handler![discover_website])
+        .invoke_handler(tauri::generate_handler![discover_website, fetch_feed_entries])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
 }
